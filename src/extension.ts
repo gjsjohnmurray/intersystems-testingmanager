@@ -6,6 +6,7 @@ import { setupHistoryExplorerController } from "./historyExplorer";
 import { setupServerTestsController } from "./serverTests";
 import { replaceLocalRootItems, setupLocalTestsController } from "./localTests";
 import { DebugTrackerFactory } from "./debugTrackerFactory";
+import { logout, serverSessions } from "./makeRESTRequest";
 
 export const extensionId = "intersystems-community.testingmanager";
 export let localTestController: vscode.TestController;
@@ -118,6 +119,12 @@ export async function activate(context: vscode.ExtensionContext) {
     return api;
 }
 
-export function deactivate() {
-    //
+export async function deactivate() {
+	// Do our best to log out of all sessions
+
+	const promises: Promise<any>[] = [];
+	for (const serverSession of serverSessions) {
+		promises.push(logout(serverSession[1].serverName));
+	}
+	await Promise.allSettled(promises);
 }

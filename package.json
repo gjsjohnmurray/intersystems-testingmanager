@@ -43,10 +43,8 @@
     "lint-fix": "tslint --project tsconfig.json -t verbose --fix"
   },
   "dependencies": {
-    "axios": "^0.24",
-    "axios-cookiejar-support": "^1.0.1",
-    "node-cmd": "^4.0.0",
-    "tough-cookie": "^4.0.0"
+    "axios": "^1.12.2",
+    "node-cmd": "^4.0.0"
   },
   "devDependencies": {
     "@intersystems-community/intersystems-servermanager": "^3.8.0",
