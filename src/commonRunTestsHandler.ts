@@ -204,7 +204,8 @@ export async function commonRunTestsHandler(controller: vscode.TestController, r
         }
       }
 
-      // No longer rely on ISFS redirection of /.vscode because since ObjectScript v3.0 it no longer works for client-only workspaces.
+      // Form the ISFS target folder uri and delete any existing content
+      // Note that authority here is just server name, no :namespace
       const testRoot = vscode.Uri.from({ scheme: 'isfs', authority, path: `/_vscode/${namespace}/UnitTestRoot/${username}`, query: "csp&ns=%SYS" });
       try {
         // Limitation of the Atelier API means this can only delete the files, not the folders
@@ -214,7 +215,7 @@ export async function commonRunTestsHandler(controller: vscode.TestController, r
         console.log(error);
       }
 
-      // Map of uri strings checked for presence of a coverage.list file, recording the relative path of those that were found
+      // Map of uri strings checked for presence of a coverage.list file, recording the absolute path of those that were found
       const mapCoverageLists = new Map<string, string>();
       for await (const mapInstance of mapTestClasses) {
         const key = mapInstance[0];
@@ -230,7 +231,7 @@ export async function commonRunTestsHandler(controller: vscode.TestController, r
         if (['isfs', 'isfs-readonly'].includes(sourceBaseUri.scheme)) {
           continue;
         }
-        while (pathParts.length > 1) {
+        while (pathParts.length > 0) {
           const currentPath = pathParts.join('/');
           // Check for coverage.list file here
           const coverageListUri = sourceBaseUri.with({ path: sourceBaseUri.path.concat(`${currentPath}/coverage.list`) });
@@ -240,7 +241,7 @@ export async function commonRunTestsHandler(controller: vscode.TestController, r
           }
           try {
             await vscode.workspace.fs.stat(coverageListUri);
-            mapCoverageLists.set(coverageListUri.toString(), currentPath);
+            mapCoverageLists.set(coverageListUri.toString(), testRoot.path.concat(currentPath));
           } catch (error) {
             if (error.code !== vscode.FileSystemError.FileNotFound().code) {
               console.log(`Error checking for ${coverageListUri.toString()}:`, error);
@@ -255,7 +256,7 @@ export async function commonRunTestsHandler(controller: vscode.TestController, r
         if (path.length > 0) {
           const coverageListUri = vscode.Uri.parse(uriString, true);
           try {
-            await vscode.workspace.fs.copy(coverageListUri, testRoot.with({ path: testRoot.path.concat(`${path}/coverage.list`) }));
+            await vscode.workspace.fs.copy(coverageListUri, testRoot.with({ path: `${path}/coverage.list` }));
           } catch (error) {
             console.log(`Error copying ${coverageListUri.path}:`, error);
           }

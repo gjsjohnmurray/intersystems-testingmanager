@@ -65,6 +65,14 @@ For a workspace using client-side editing, test classes are by default sought in
 
 > By setting this at the workspace level you can have different file layouts for different projects.
 
+To gather test coverage data you will need at least one `coverage.list` file in your tree of test classes. See the Test Coverage Tool documentation for information about what this file should contain.
+
+When using client-side editing your `coverage.list` file(s) must be in or below your `relativeTestRoot` client-side folder.
+
+When using server-side editing, put a single `coverage.list` file in the server-side folder named in your ^UnitTestRoot global.
+
+If no `coverage.list` file is found during a coverage run then the output in the Test Results tab of the VS Code Panel will include the line `No code coverage found (!)`.
+
 ## Running Tests
 
 VS Code provides several different ways to run tests.
